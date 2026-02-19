@@ -1,0 +1,77 @@
+# DEPS.yml - Dependency configuration for RISC-V CPU modules
+
+# Testbench target for ALU comprehensive test
+alu_test:
+  deps:
+    - riscv_alu.sv
+    - tb_riscv_alu.sv
+  top: tb_riscv_alu
+
+# Testbench target for Program Counter
+pc_test:
+  deps:
+    - program_counter.sv
+    - tb_program_counter.sv
+  top: tb_program_counter
+
+# Testbench target for Register File
+regfile_test:
+  deps:
+    - register_file.sv
+    - tb_register_file.sv
+  top: tb_register_file
+
+# Testbench target for Control Unit
+control_test:
+  deps:
+    - control_unit.sv
+    - tb_control_unit.sv
+  top: tb_control_unit
+
+# Testbench target for Simple Memory
+memory_test:
+  deps:
+    - simple_memory.sv
+    - tb_simple_memory.sv
+  top: tb_simple_memory
+
+# Testbench target for Load-Store Unit (with memory integration)
+lsu_test:
+  deps:
+    - simple_memory.sv
+    - load_store_unit.sv
+    - tb_load_store_unit.sv
+  top: tb_load_store_unit
+
+# Testbench target for Immediate Generator
+immgen_test:
+  deps:
+    - immediate_generator.sv
+    - tb_immediate_generator.sv
+  top: tb_immediate_generator
+
+# Testbench target for Branch Unit
+branch_test:
+  deps:
+    - branch_unit.sv
+    - tb_branch_unit.sv
+  top: tb_branch_unit
+
+# Complete RISC-V CPU (5-stage pipeline)
+cpu_top_test:
+  deps:
+    - program_counter.sv
+    - simple_memory.sv
+    - pipeline_if_id.sv
+    - control_unit.sv
+    - register_file.sv
+    - immediate_generator.sv
+    - pipeline_id_ex.sv
+    - riscv_alu.sv
+    - branch_unit.sv
+    - pipeline_ex_mem.sv
+    - load_store_unit.sv
+    - pipeline_mem_wb.sv
+    - riscv_cpu_top.sv
+    - tb_riscv_cpu_top.sv
+  top: tb_riscv_cpu_top

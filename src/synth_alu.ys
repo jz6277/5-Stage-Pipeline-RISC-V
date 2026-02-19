@@ -1,0 +1,62 @@
+# Yosys Synthesis Script for RISC-V ALU
+# Gate-level implementation synthesis
+
+# Read the design files
+read_verilog -sv riscv_alu.sv
+
+# Hierarchy check - set top module
+hierarchy -check -top riscv_alu
+
+# Print statistics before synthesis
+echo "===== Pre-synthesis Statistics ====="
+stat
+
+# Translate processes (always blocks, etc.)
+proc
+
+# Flatten the design (optional - removes hierarchy for optimization)
+# Uncomment the next line if you want aggressive flattening
+# flatten
+
+# Optimize the design - FSM extraction, basic optimizations
+fsm
+opt
+
+# Technology mapping to generic gates
+techmap
+
+# Optimize again after tech mapping
+opt
+
+# Map to basic logic gates (AND, OR, NOT, etc.)
+abc -g AND,OR,NOT,XOR
+
+# Clean up the design
+clean
+
+# Print post-synthesis statistics
+echo "===== Post-synthesis Statistics ====="
+stat
+
+# Print detailed cell breakdown
+echo "===== Cell Type Breakdown ====="
+stat -top 20
+
+# Generate reports
+tee -q -o synth_report.txt stat -width
+
+# Write synthesized netlist (Verilog format)
+write_verilog -noattr -noexpr synth_alu.v
+
+# Write JSON format for visualization
+write_json synth_alu.json
+
+# Optional: Generate graphical representation (DOT format)
+show -prefix synth_alu_diagram -format dot -width
+
+echo "===== Synthesis Complete ====="
+echo "Output files:"
+echo "  - synth_alu.v         : Synthesized Verilog netlist"
+echo "  - synth_alu.json      : JSON representation"
+echo "  - synth_report.txt    : Synthesis statistics"
+echo "  - synth_alu_diagram.dot : Graphical diagram"

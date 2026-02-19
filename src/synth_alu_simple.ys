@@ -1,0 +1,17 @@
+# Simple Yosys Synthesis Script for RISC-V ALU
+# Quick synthesis with basic reporting
+
+# Read design
+read_verilog -sv riscv_alu.sv
+
+# Set top module
+hierarchy -top riscv_alu
+
+# Basic synthesis flow
+synth -top riscv_alu
+
+# Statistics
+stat
+
+# Write output
+write_verilog synth_alu_simple.v
