@@ -57,7 +57,7 @@ branch_test:
     - tb_branch_unit.sv
   top: tb_branch_unit
 
-# Complete RISC-V CPU (5-stage pipeline)
+# Complete RISC-V CPU (5-stage pipeline with forwarding)
 cpu_top_test:
   deps:
     - program_counter.sv
@@ -69,6 +69,7 @@ cpu_top_test:
     - pipeline_id_ex.sv
     - riscv_alu.sv
     - branch_unit.sv
+    - forwarding_unit.sv
     - pipeline_ex_mem.sv
     - load_store_unit.sv
     - pipeline_mem_wb.sv

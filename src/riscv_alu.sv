@@ -50,10 +50,10 @@ module riscv_alu (
     // =====================================================
     // Adder/Subtractor (32-bit ripple-carry using full adders)
     // =====================================================
-    // For subtraction, invert B and set carry_in = 1
+    // For subtraction, invert A and set carry_in = 1 (computing B - A instead of A - B)
     generate
         for (i = 0; i < 32; i = i + 1) begin : invert_b
-            xor (b_inverted[i], operand_b[i], is_sub);
+            xor (b_inverted[i], operand_a[i], is_sub);
         end
     endgenerate
 
@@ -66,7 +66,7 @@ module riscv_alu (
     generate
         for (i = 0; i < 32; i = i + 1) begin : full_adders
             full_adder fa (
-                .a(operand_a[i]),
+                .a(operand_b[i]),
                 .b(b_input[i]),
                 .cin(carry[i]),
                 .sum(add_sub_result[i]),
@@ -95,21 +95,21 @@ module riscv_alu (
     // Barrel Shifter for SLL, SRL, SRA
     // =====================================================
     barrel_shifter_left bsl (
-        .data_in(operand_a),
-        .shift_amt(operand_b[4:0]),
+        .data_in(operand_b),
+        .shift_amt(operand_a[4:0]),
         .data_out(sll_result)
     );
 
     barrel_shifter_right bsr_logical (
-        .data_in(operand_a),
-        .shift_amt(operand_b[4:0]),
+        .data_in(operand_b),
+        .shift_amt(operand_a[4:0]),
         .arithmetic(1'b0),
         .data_out(srl_result)
     );
 
     barrel_shifter_right bsr_arithmetic (
-        .data_in(operand_a),
-        .shift_amt(operand_b[4:0]),
+        .data_in(operand_b),
+        .shift_amt(operand_a[4:0]),
         .arithmetic(1'b1),
         .data_out(sra_result)
     );

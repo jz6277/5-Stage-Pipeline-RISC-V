@@ -163,24 +163,60 @@ module riscv_cpu_top (
     );
 
     // ========== Execute (EX) Stage ==========
+    // Forward declarations for forwarding unit
+    logic [31:0] alu_result_mem;
+    logic [4:0]  rd_mem;
+    logic        reg_write_mem;
+    
     logic [31:0] alu_operand_a, alu_operand_b, alu_result_ex;
     logic        alu_zero, branch_taken_ex;
     logic [31:0] pc_target_ex;
+    logic [1:0]  forward_a, forward_b;
+    logic [31:0] forwarded_a, forwarded_b;
     
-    // ALU source muxes
+    // Forwarding Unit
+    forwarding_unit fwd (
+        .rs1_ex(rs1_ex),
+        .rs2_ex(rs2_ex),
+        .rd_mem(rd_mem),
+        .reg_write_mem(reg_write_mem),
+        .rd_wb(rd_wb),
+        .reg_write_wb(reg_write_wb),
+        .forward_a(forward_a),
+        .forward_b(forward_b)
+    );
+    
+    // Forwarding muxes for ALU operands
+    always_comb begin
+        case (forward_a)
+            2'b00: forwarded_a = read_data1_ex;    // No forwarding
+            2'b01: forwarded_a = write_data_wb;    // Forward from WB
+            2'b10: forwarded_a = alu_result_mem;   // Forward from MEM
+            default: forwarded_a = read_data1_ex;
+        endcase
+        
+        case (forward_b)
+            2'b00: forwarded_b = read_data2_ex;    // No forwarding
+            2'b01: forwarded_b = write_data_wb;    // Forward from WB
+            2'b10: forwarded_b = alu_result_mem;   // Forward from MEM
+            default: forwarded_b = read_data2_ex;
+        endcase
+    end
+    
+    // ALU source muxes (now use forwarded values)
     always_comb begin
         case (alu_src_a_ex)
-            2'b00: alu_operand_a = read_data1_ex;
+            2'b00: alu_operand_a = forwarded_a;
             2'b01: alu_operand_a = pc_ex;
             2'b10: alu_operand_a = 32'h0;
-            default: alu_operand_a = read_data1_ex;
+            default: alu_operand_a = forwarded_a;
         endcase
         
         case (alu_src_b_ex)
-            2'b00: alu_operand_b = read_data2_ex;
+            2'b00: alu_operand_b = forwarded_b;
             2'b01: alu_operand_b = immediate_ex;
             2'b10: alu_operand_b = 32'd4;
-            default: alu_operand_b = read_data2_ex;
+            default: alu_operand_b = forwarded_b;
         endcase
     end
     
@@ -193,10 +229,10 @@ module riscv_cpu_top (
         .zero(alu_zero)
     );
     
-    // Branch Unit
+    // Branch Unit (also uses forwarded values)
     branch_unit branch_eval (
-        .operand_a(read_data1_ex),
-        .operand_b(read_data2_ex),
+        .operand_a(forwarded_a),
+        .operand_b(forwarded_b),
         .funct3(funct3_ex),
         .branch(branch_ex),
         .branch_taken(branch_taken_ex)
@@ -208,10 +244,10 @@ module riscv_cpu_top (
     assign pc_branch_target = pc_target_ex;
 
     // ========== EX/MEM Pipeline Register ==========
-    logic [31:0] alu_result_mem, write_data_mem, pc_target_mem, pc_plus4_mem;
-    logic [4:0]  rd_mem;
+    // (alu_result_mem, rd_mem, reg_write_mem declared earlier for forwarding)
+    logic [31:0] write_data_mem, pc_target_mem, pc_plus4_mem;
     logic [2:0]  funct3_mem;
-    logic        branch_taken_mem, reg_write_mem, mem_read_mem, mem_write_mem;
+    logic        branch_taken_mem, mem_read_mem, mem_write_mem;
     logic [1:0]  result_src_mem;
     logic        ex_mem_flush;
     
@@ -222,7 +258,7 @@ module riscv_cpu_top (
         .reset(reset),
         .flush(ex_mem_flush),
         .alu_result_in(alu_result_ex),
-        .write_data_in(read_data2_ex),
+        .write_data_in(forwarded_b),
         .pc_target_in(pc_target_ex),
         .pc_plus4_in(pc_plus4_ex),
         .rd_in(rd_ex),
