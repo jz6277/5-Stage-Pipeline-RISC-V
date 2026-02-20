@@ -1,0 +1,16 @@
+# Simulation (Icarus Verilog / vvp)
+*.out
+*.vcd
+*.fst
+dumpfile.*
+
+# Synthesis (Yosys)
+synth_*.v
+synth_*.json
+synth_report.txt
+*.dot
+
+# Editor / OS
+.DS_Store
+*.swp
+*~
