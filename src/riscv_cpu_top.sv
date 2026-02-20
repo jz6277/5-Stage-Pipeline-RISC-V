@@ -11,10 +11,11 @@ module riscv_cpu_top (
     logic        pc_enable, pc_branch_sel;
     logic [31:0] pc_branch_target;
     
-    // PC logic
+    // PC logic (use assign to avoid multiple-driver conflict with pc_next output)
+    logic [31:0] pc_next_unused;  // PC drives this; we use pc_if+4 for pipeline
     assign pc_plus4_if = pc_if + 32'd4;
     assign pc_enable = 1'b1;  // Always enabled (simplified, no stalls yet)
-    
+
     program_counter pc_unit (
         .clock(clock),
         .reset(reset),
@@ -22,11 +23,11 @@ module riscv_cpu_top (
         .pc_src(pc_branch_sel),
         .pc_target(pc_branch_target),
         .pc_current(pc_if),
-        .pc_next(pc_plus4_if)
+        .pc_next(pc_next_unused)
     );
     
-    // Instruction Memory
-    simple_memory #(.ADDR_WIDTH(12)) imem (
+    // Instruction Memory (no clear on reset - testbench loads program)
+    simple_memory #(.ADDR_WIDTH(12), .CLEAR_ON_RESET(0)) imem (
         .clock(clock),
         .reset(reset),
         .enable(1'b1),

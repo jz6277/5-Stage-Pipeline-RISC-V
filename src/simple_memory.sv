@@ -4,7 +4,8 @@
 
 module simple_memory #(
     parameter ADDR_WIDTH = 12,          // Address width in bytes (4KB default)
-    parameter DATA_WIDTH = 32           // Data width (32-bit)
+    parameter DATA_WIDTH = 32,         // Data width (32-bit)
+    parameter CLEAR_ON_RESET = 1       // 0 = don't clear (for ROM/instruction mem)
 ) (
     input  logic                    clock,          // System clock
     input  logic                    reset,          // Synchronous reset (active high)
@@ -40,9 +41,7 @@ module simple_memory #(
 
     // Synchronous write with byte enables
     always_ff @(posedge clock) begin
-        if (reset) begin
-            // Optional: Initialize memory to zero
-            // Can be commented out for faster synthesis
+        if (reset && CLEAR_ON_RESET) begin
             for (int i = 0; i < MEM_WORDS*4; i = i + 1) begin
                 memory[i] <= 8'h0;
             end
