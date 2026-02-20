@@ -3,19 +3,21 @@
 
 module tb_riscv_cpu_top;
     logic clock;
-    logic reset;
-    
+    logic reset = 1;  // Initialize to avoid X; ensures clean negedge for memory load
+
     initial begin
         clock = 0;
         forever #5 clock = ~clock;
     end
-    
+
     riscv_cpu_top cpu (.clock(clock), .reset(reset));
-    
-    // Comprehensive test program
+
+    // Load program into memory and run - all in one block for deterministic ordering
+    // Imem has CLEAR_ON_RESET=0 so we load before reset and it persists
     initial begin
-        @(negedge reset);
-        
+        int pass_count, fail_count;
+
+        // Load memory first (imem has CLEAR_ON_RESET=0)
         // 0x00: addi x1, x0, 10 (0x00A00093)
         cpu.imem.memory[0]=8'h93; cpu.imem.memory[1]=8'h00; cpu.imem.memory[2]=8'hA0; cpu.imem.memory[3]=8'h00;
         // 0x04: addi x2, x0, 5 (0x00500113)
@@ -48,9 +50,15 @@ module tb_riscv_cpu_top;
         cpu.imem.memory[56]=8'h93; cpu.imem.memory[57]=8'h06; cpu.imem.memory[58]=8'h30; cpu.imem.memory[59]=8'h06;
         // 0x3C: addi x14, x0, 30 (BEQ target) (0x01E00713)
         cpu.imem.memory[60]=8'h13; cpu.imem.memory[61]=8'h07; cpu.imem.memory[62]=8'hE0; cpu.imem.memory[63]=8'h01;
-        
-        cpu.regfile.registers[2] = 32'h00001000;  // sp
-        
+
+        $display("========================================");
+        $display("RISC-V CPU Comprehensive ISA Test");
+        $display("========================================");
+        reset = 1;
+        repeat(5) @(posedge clock);
+        reset = 0;
+        cpu.regfile.registers[2] = 32'h00001000;  // sp (after reset clears regfile)
+
         $display("Comprehensive RV32I Test Program Loaded:");
         $display("  R-type: ADD, SUB, AND, OR, XOR");
         $display("  I-type: ADDI, LW");
@@ -58,19 +66,8 @@ module tb_riscv_cpu_top;
         $display("  B-type: BEQ");
         $display("  U-type: LUI");
         $display("  J-type: JAL");
-    end
-    
-    initial begin
-        int pass_count, fail_count;
-        
-        $display("========================================");
-        $display("RISC-V CPU Comprehensive ISA Test");
-        $display("========================================");
-        reset = 1;
-        repeat(5) @(posedge clock);
-        reset = 0;
         $display("Reset released, executing program...\n");
-        
+
         repeat(40) @(posedge clock);
         
         $display("\n========================================");
