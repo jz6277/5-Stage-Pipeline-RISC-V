@@ -5,7 +5,8 @@
 module simple_memory #(
     parameter ADDR_WIDTH = 12,          // Address width in bytes (4KB default)
     parameter DATA_WIDTH = 32,         // Data width (32-bit)
-    parameter CLEAR_ON_RESET = 1       // 0 = don't clear (for ROM/instruction mem)
+    parameter CLEAR_ON_RESET = 1,      // 0 = don't clear (for ROM/instruction mem)
+    parameter string INIT_FILE = ""    // If non-empty, load byte array via $readmemh (FPGA/synth)
 ) (
     input  logic                    clock,          // System clock
     input  logic                    reset,          // Synchronous reset (active high)
@@ -22,6 +23,11 @@ module simple_memory #(
     // Memory array (word-addressable, byte-accessible)
     localparam MEM_WORDS = 2**(ADDR_WIDTH-2);  // Number of 32-bit words
     logic [7:0] memory [MEM_WORDS*4-1:0];      // Byte array
+
+    initial begin
+        if (INIT_FILE != "")
+            $readmemh(INIT_FILE, memory);
+    end
 
     // Word-aligned address
     logic [ADDR_WIDTH-3:0] word_addr;

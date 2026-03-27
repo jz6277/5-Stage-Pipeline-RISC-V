@@ -10,6 +10,9 @@ synth_*.json
 synth_report.txt
 *.dot
 
+# Vivado generated project
+vivado/project/
+
 # Editor / OS
 .DS_Store
 *.swp

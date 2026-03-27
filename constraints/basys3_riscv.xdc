@@ -1,0 +1,31 @@
+## Basys3 — xc7a35tcpg236-1 (Digilent pinout)
+
+set_property CFGBVS VCCO [current_design]
+set_property CONFIG_VOLTAGE 3.3 [current_design]
+
+## 100 MHz clock
+set_property -dict { PACKAGE_PIN W5   IOSTANDARD LVCMOS33 } [get_ports CLK100MHZ]
+create_clock -add -name sys_clk_pin -period 10.0 -waveform {0 5} [get_ports {CLK100MHZ}]
+
+## Center button — active high when pressed (CPU reset)
+set_property -dict { PACKAGE_PIN U18   IOSTANDARD LVCMOS33 } [get_ports btnC]
+
+## LEDs
+set_property -dict { PACKAGE_PIN U16   IOSTANDARD LVCMOS33 } [get_ports {led[0]}]
+set_property -dict { PACKAGE_PIN E19   IOSTANDARD LVCMOS33 } [get_ports {led[1]}]
+set_property -dict { PACKAGE_PIN U19   IOSTANDARD LVCMOS33 } [get_ports {led[2]}]
+set_property -dict { PACKAGE_PIN V17   IOSTANDARD LVCMOS33 } [get_ports {led[3]}]
+set_property -dict { PACKAGE_PIN W16   IOSTANDARD LVCMOS33 } [get_ports {led[4]}]
+set_property -dict { PACKAGE_PIN W15   IOSTANDARD LVCMOS33 } [get_ports {led[5]}]
+set_property -dict { PACKAGE_PIN V15   IOSTANDARD LVCMOS33 } [get_ports {led[6]}]
+set_property -dict { PACKAGE_PIN U14   IOSTANDARD LVCMOS33 } [get_ports {led[7]}]
+set_property -dict { PACKAGE_PIN W13   IOSTANDARD LVCMOS33 } [get_ports {led[8]}]
+set_property -dict { PACKAGE_PIN V2    IOSTANDARD LVCMOS33 } [get_ports {led[9]}]
+set_property -dict { PACKAGE_PIN U3    IOSTANDARD LVCMOS33 } [get_ports {led[10]}]
+set_property -dict { PACKAGE_PIN W3    IOSTANDARD LVCMOS33 } [get_ports {led[11]}]
+set_property -dict { PACKAGE_PIN Y3    IOSTANDARD LVCMOS33 } [get_ports {led[12]}]
+set_property -dict { PACKAGE_PIN W2    IOSTANDARD LVCMOS33 } [get_ports {led[13]}]
+set_property -dict { PACKAGE_PIN Y1    IOSTANDARD LVCMOS33 } [get_ports {led[14]}]
+set_property -dict { PACKAGE_PIN W1    IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
+
+## CPU runs on divided clock generated inside basys3_riscv_top (do not constrain as primary clock)
