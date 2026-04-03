@@ -4,13 +4,36 @@
 module tb_riscv_cpu_top;
     logic clock;
     logic reset = 1;  // Initialize to avoid X; ensures clean negedge for memory load
+    logic [11:0] instruction_address;
+    logic [31:0] instruction_data;
 
     initial begin
         clock = 0;
         forever #5 clock = ~clock;
     end
 
-    riscv_cpu_top cpu (.clock(clock), .reset(reset));
+    riscv_cpu_top cpu (
+        .clock(clock),
+        .reset(reset),
+        .instruction_data(instruction_data),
+        .instruction_address(instruction_address),
+        .debug_done(),
+        .debug_regs_flat()
+    );
+
+    simple_memory #(
+        .ADDR_WIDTH(12),
+        .CLEAR_ON_RESET(0)
+    ) imem (
+        .clock(clock),
+        .reset(reset),
+        .enable(1'b1),
+        .write_enable(1'b0),
+        .byte_enable(4'b1111),
+        .address(instruction_address),
+        .write_data(32'h0),
+        .read_data(instruction_data)
+    );
 
     // Load program into memory and run - all in one block for deterministic ordering
     // Imem has CLEAR_ON_RESET=0 so we load before reset and it persists
@@ -19,37 +42,37 @@ module tb_riscv_cpu_top;
 
         // Load memory first (imem has CLEAR_ON_RESET=0)
         // 0x00: addi x1, x0, 10 (0x00A00093)
-        cpu.imem.memory[0]=8'h93; cpu.imem.memory[1]=8'h00; cpu.imem.memory[2]=8'hA0; cpu.imem.memory[3]=8'h00;
+        imem.memory[0]=8'h93; imem.memory[1]=8'h00; imem.memory[2]=8'hA0; imem.memory[3]=8'h00;
         // 0x04: addi x2, x0, 5 (0x00500113)
-        cpu.imem.memory[4]=8'h13; cpu.imem.memory[5]=8'h01; cpu.imem.memory[6]=8'h50; cpu.imem.memory[7]=8'h00;
+        imem.memory[4]=8'h13; imem.memory[5]=8'h01; imem.memory[6]=8'h50; imem.memory[7]=8'h00;
         // 0x08: add x3, x1, x2 (0x002081B3) R-type
-        cpu.imem.memory[8]=8'hB3; cpu.imem.memory[9]=8'h81; cpu.imem.memory[10]=8'h20; cpu.imem.memory[11]=8'h00;
+        imem.memory[8]=8'hB3; imem.memory[9]=8'h81; imem.memory[10]=8'h20; imem.memory[11]=8'h00;
         // 0x0C: sub x4, x1, x2 (0x40208233) R-type
-        cpu.imem.memory[12]=8'h33; cpu.imem.memory[13]=8'h82; cpu.imem.memory[14]=8'h20; cpu.imem.memory[15]=8'h40;
+        imem.memory[12]=8'h33; imem.memory[13]=8'h82; imem.memory[14]=8'h20; imem.memory[15]=8'h40;
         // 0x10: and x5, x1, x2 (0x0020F2B3) R-type
-        cpu.imem.memory[16]=8'hB3; cpu.imem.memory[17]=8'hF2; cpu.imem.memory[18]=8'h20; cpu.imem.memory[19]=8'h00;
+        imem.memory[16]=8'hB3; imem.memory[17]=8'hF2; imem.memory[18]=8'h20; imem.memory[19]=8'h00;
         // 0x14: or x6, x1, x2 (0x0020E333) R-type
-        cpu.imem.memory[20]=8'h33; cpu.imem.memory[21]=8'hE3; cpu.imem.memory[22]=8'h20; cpu.imem.memory[23]=8'h00;
+        imem.memory[20]=8'h33; imem.memory[21]=8'hE3; imem.memory[22]=8'h20; imem.memory[23]=8'h00;
         // 0x18: xor x7, x1, x2 (0x0020C3B3) R-type
-        cpu.imem.memory[24]=8'hB3; cpu.imem.memory[25]=8'hC3; cpu.imem.memory[26]=8'h20; cpu.imem.memory[27]=8'h00;
+        imem.memory[24]=8'hB3; imem.memory[25]=8'hC3; imem.memory[26]=8'h20; imem.memory[27]=8'h00;
         // 0x1C: lui x8, 0x12345 (0x12345437) U-type
-        cpu.imem.memory[28]=8'h37; cpu.imem.memory[29]=8'h54; cpu.imem.memory[30]=8'h34; cpu.imem.memory[31]=8'h12;
+        imem.memory[28]=8'h37; imem.memory[29]=8'h54; imem.memory[30]=8'h34; imem.memory[31]=8'h12;
         // 0x20: jal x9, 0x08 (offset=8) (0x008004EF) J-type
-        cpu.imem.memory[32]=8'hEF; cpu.imem.memory[33]=8'h04; cpu.imem.memory[34]=8'h80; cpu.imem.memory[35]=8'h00;
+        imem.memory[32]=8'hEF; imem.memory[33]=8'h04; imem.memory[34]=8'h80; imem.memory[35]=8'h00;
         // 0x24: addi x10, x0, 99 (should be skipped!)
-        cpu.imem.memory[36]=8'h13; cpu.imem.memory[37]=8'h05; cpu.imem.memory[38]=8'h30; cpu.imem.memory[39]=8'h06;
+        imem.memory[36]=8'h13; imem.memory[37]=8'h05; imem.memory[38]=8'h30; imem.memory[39]=8'h06;
         // 0x28: addi x11, x0, 20 (JAL target) (0x01400593)
-        cpu.imem.memory[40]=8'h93; cpu.imem.memory[41]=8'h05; cpu.imem.memory[42]=8'h40; cpu.imem.memory[43]=8'h01;
+        imem.memory[40]=8'h93; imem.memory[41]=8'h05; imem.memory[42]=8'h40; imem.memory[43]=8'h01;
         // 0x2C: sw x1, 0(sp) (0x00112023) S-type
-        cpu.imem.memory[44]=8'h23; cpu.imem.memory[45]=8'h20; cpu.imem.memory[46]=8'h11; cpu.imem.memory[47]=8'h00;
+        imem.memory[44]=8'h23; imem.memory[45]=8'h20; imem.memory[46]=8'h11; imem.memory[47]=8'h00;
         // 0x30: lw x12, 0(sp) (0x00012603) I-type load
-        cpu.imem.memory[48]=8'h03; cpu.imem.memory[49]=8'h26; cpu.imem.memory[50]=8'h01; cpu.imem.memory[51]=8'h00;
+        imem.memory[48]=8'h03; imem.memory[49]=8'h26; imem.memory[50]=8'h01; imem.memory[51]=8'h00;
         // 0x34: beq x1, x1, 8 (offset=8) (0x00108463) B-type
-        cpu.imem.memory[52]=8'h63; cpu.imem.memory[53]=8'h84; cpu.imem.memory[54]=8'h10; cpu.imem.memory[55]=8'h00;
+        imem.memory[52]=8'h63; imem.memory[53]=8'h84; imem.memory[54]=8'h10; imem.memory[55]=8'h00;
         // 0x38: addi x13, x0, 99 (should be skipped!)
-        cpu.imem.memory[56]=8'h93; cpu.imem.memory[57]=8'h06; cpu.imem.memory[58]=8'h30; cpu.imem.memory[59]=8'h06;
+        imem.memory[56]=8'h93; imem.memory[57]=8'h06; imem.memory[58]=8'h30; imem.memory[59]=8'h06;
         // 0x3C: addi x14, x0, 30 (BEQ target) (0x01E00713)
-        cpu.imem.memory[60]=8'h13; cpu.imem.memory[61]=8'h07; cpu.imem.memory[62]=8'hE0; cpu.imem.memory[63]=8'h01;
+        imem.memory[60]=8'h13; imem.memory[61]=8'h07; imem.memory[62]=8'hE0; imem.memory[63]=8'h01;
 
         $display("========================================");
         $display("RISC-V CPU Comprehensive ISA Test");

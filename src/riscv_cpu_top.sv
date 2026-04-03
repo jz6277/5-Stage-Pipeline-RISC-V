@@ -1,10 +1,12 @@
 // RISC-V 5-Stage Pipeline CPU Top Module
-// Integrates: IF, ID, EX, MEM, WB stages with all components
-// Optional: hierarchical defparam cpu.imem.INIT_FILE for FPGA bitstream (see basys3_riscv_top.sv)
+// Integrates: IF, ID, EX, MEM, WB stages with all components.
+// Instruction memory is owned externally so the board wrapper can preload it.
 
 module riscv_cpu_top (
     input  logic clock,
     input  logic reset,
+    input  logic [31:0] instruction_data,
+    output logic [11:0] instruction_address,
     output logic debug_done,
     output logic [32*32-1:0] debug_regs_flat
 );
@@ -33,20 +35,8 @@ module riscv_cpu_top (
         .pc_next(pc_next_unused)
     );
     
-    // Instruction Memory (no clear on reset — testbench loads program; FPGA uses defparam INIT_FILE)
-    simple_memory #(
-        .ADDR_WIDTH(12),
-        .CLEAR_ON_RESET(0)
-    ) imem (
-        .clock(clock),
-        .reset(reset),
-        .enable(1'b1),
-        .write_enable(1'b0),
-        .byte_enable(4'b1111),
-        .address(pc_if[11:0]),
-        .write_data(32'h0),
-        .read_data(instruction_if)
-    );
+    assign instruction_address = pc_if[11:0];
+    assign instruction_if = instruction_data;
 
     // ========== IF/ID Pipeline Register ==========
     logic [31:0] instruction_id, pc_id, pc_plus4_id;

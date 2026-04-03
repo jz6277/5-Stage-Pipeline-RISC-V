@@ -3,8 +3,8 @@
 # SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
 # IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
 # SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
-# Start of session at: Thu Apr  2 22:00:08 2026
-# Process ID         : 38856
+# Start of session at: Thu Apr  2 21:51:12 2026
+# Process ID         : 19224
 # Current directory  : C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V
 # Command line       : vivado.exe -mode batch -source c:\Users\minja\OneDrive\Documents\GitHub\5-Stage-Pipeline-RISC-V\vivado\program_board.tcl
 # Log file           : C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V/vivado.log
@@ -19,7 +19,7 @@
 # Host memory        : 38365 MB
 # Swap memory        : 2415 MB
 # Total Virtual      : 40781 MB
-# Available Virtual  : 6671 MB
+# Available Virtual  : 6619 MB
 #-----------------------------------------------------------
 source {c:\Users\minja\OneDrive\Documents\GitHub\5-Stage-Pipeline-RISC-V\vivado\program_board.tcl}
 # set script_dir [file dirname [file normalize [info script]]]
@@ -29,7 +29,7 @@ source {c:\Users\minja\OneDrive\Documents\GitHub\5-Stage-Pipeline-RISC-V\vivado\
 #   exit 1
 # }
 # open_hw_manager
-open_hw_manager: Time (s): cpu = 00:00:11 ; elapsed = 00:00:09 . Memory (MB): peak = 528.461 ; gain = 223.770
+open_hw_manager: Time (s): cpu = 00:00:11 ; elapsed = 00:00:09 . Memory (MB): peak = 528.207 ; gain = 222.617
 # connect_hw_server
 INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121
 INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:0
@@ -62,4 +62,4 @@ INFO: [Labtools 27-3164] End of startup status: HIGH
 # puts "Programmed device with $bit"
 Programmed device with C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V/vivado/project/basys3_riscv.runs/impl_1/basys3_riscv_top.bit
 # close_hw_manager
-INFO: [Common 17-206] Exiting Vivado at Thu Apr  2 22:00:27 2026...
+INFO: [Common 17-206] Exiting Vivado at Thu Apr  2 21:51:30 2026...
