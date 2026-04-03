@@ -3,10 +3,10 @@
 # SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
 # IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
 # SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
-# Start of session at: Thu Apr  2 20:57:16 2026
-# Process ID         : 31004
+# Start of session at: Thu Apr  2 20:56:50 2026
+# Process ID         : 31468
 # Current directory  : C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V
-# Command line       : vivado.exe -mode batch -source C:\Users\minja\AppData\Local\Temp\program_basys3_hw.tcl
+# Command line       : vivado.exe -mode batch -source C:\Users\minja\AppData\Local\Temp\detect_basys3_hw.tcl
 # Log file           : C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V/vivado.log
 # Journal file       : C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V\vivado.jou
 # Running On         : Mintopus
@@ -19,11 +19,11 @@
 # Host memory        : 38365 MB
 # Swap memory        : 2415 MB
 # Total Virtual      : 40781 MB
-# Available Virtual  : 9119 MB
+# Available Virtual  : 9194 MB
 #-----------------------------------------------------------
-source {C:\Users\minja\AppData\Local\Temp\program_basys3_hw.tcl}
+source {C:\Users\minja\AppData\Local\Temp\detect_basys3_hw.tcl}
 # open_hw_manager
-open_hw_manager: Time (s): cpu = 00:00:10 ; elapsed = 00:00:08 . Memory (MB): peak = 528.754 ; gain = 222.238
+open_hw_manager: Time (s): cpu = 00:00:10 ; elapsed = 00:00:08 . Memory (MB): peak = 527.977 ; gain = 221.793
 # connect_hw_server
 INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121
 INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:0
@@ -41,14 +41,10 @@ INFO: [Labtools 27-2221] Launch Output:
 
 # open_hw_target
 INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210183BF78ABA
-# current_hw_device [lindex [get_hw_devices] 0]
-# set_property PROGRAM.FILE {C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V/vivado/project/basys3_riscv.runs/impl_1/basys3_riscv_top.bit} [current_hw_device]
-# program_hw_devices [current_hw_device]
-INFO: [Labtools 27-3164] End of startup status: HIGH
-# refresh_hw_device [current_hw_device]
-INFO: [Labtools 27-1434] Device xc7a35t (JTAG device index = 0) is programmed with a design that has no supported soft debug core(s) in it.
-# puts "PROGRAMMED:[current_hw_device]"
-PROGRAMMED:xc7a35t_0
+# puts "TARGETS:[get_hw_targets]"
+TARGETS:localhost:3121/xilinx_tcf/Digilent/210183BF78ABA
+# puts "DEVICES:[get_hw_devices]"
+DEVICES:xc7a35t_0
 # close_hw_manager
 # exit
-INFO: [Common 17-206] Exiting Vivado at Thu Apr  2 20:57:35 2026...
+INFO: [Common 17-206] Exiting Vivado at Thu Apr  2 20:57:07 2026...

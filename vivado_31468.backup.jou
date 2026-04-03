@@ -3,10 +3,10 @@
 # SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
 # IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
 # SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
-# Start of session at: Thu Mar 26 23:34:36 2026
-# Process ID         : 4692
+# Start of session at: Thu Apr  2 20:56:50 2026
+# Process ID         : 31468
 # Current directory  : C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V
-# Command line       : vivado.exe -mode batch -source C:\Users\minja\AppData\Local\Temp\basys3_riscv_vivado\build_basys3_riscv.tcl
+# Command line       : vivado.exe -mode batch -source C:\Users\minja\AppData\Local\Temp\detect_basys3_hw.tcl
 # Log file           : C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V/vivado.log
 # Journal file       : C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V\vivado.jou
 # Running On         : Mintopus
@@ -19,15 +19,6 @@
 # Host memory        : 38365 MB
 # Swap memory        : 2415 MB
 # Total Virtual      : 40781 MB
-# Available Virtual  : 12697 MB
+# Available Virtual  : 9194 MB
 #-----------------------------------------------------------
-source {C:\Users\minja\AppData\Local\Temp\basys3_riscv_vivado\build_basys3_riscv.tcl}
-# set repo_root  [file normalize {C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V}]
-# set proj_name  basys3_riscv
-# set proj_dir   [file normalize [file join {C:/Users/minja/AppData/Local/Temp/basys3_riscv_vivado} project]]
-# set src_dir    [file join  src]
-# set constr_dir [file join  constraints]
-# file mkdir 
-# create_project -force   -part xc7a35tcpg236-1
-ERROR: [Coretcl 2-1084] Missing value for option 'name', please type create_project -help' for usage info.
-INFO: [Common 17-206] Exiting Vivado at Thu Mar 26 23:34:40 2026...
+source {C:\Users\minja\AppData\Local\Temp\detect_basys3_hw.tcl}

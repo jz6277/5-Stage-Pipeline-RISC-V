@@ -1,0 +1,66 @@
+#-----------------------------------------------------------
+# Vivado v2025.2 (64-bit)
+# SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+# IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+# SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+# Start of session at: Thu Apr  2 20:48:34 2026
+# Process ID         : 9472
+# Current directory  : C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V/vivado
+# Command line       : vivado.exe -mode batch -source C:\Users\minja\OneDrive\Documents\GitHub\5-Stage-Pipeline-RISC-V\vivado\create_project.tcl
+# Log file           : C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V/vivado/vivado.log
+# Journal file       : C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V/vivado\vivado.jou
+# Running On         : Mintopus
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 26200
+# Processor Detail   : AMD Ryzen 9 6900HS with Radeon Graphics        
+# CPU Frequency      : 3294 MHz
+# CPU Physical cores : 8
+# CPU Logical cores  : 16
+# Host memory        : 38365 MB
+# Swap memory        : 2415 MB
+# Total Virtual      : 40781 MB
+# Available Virtual  : 9605 MB
+#-----------------------------------------------------------
+source {C:\Users\minja\OneDrive\Documents\GitHub\5-Stage-Pipeline-RISC-V\vivado\create_project.tcl}
+# set script_dir [file dirname [file normalize [info script]]]
+# set repo_root  [file normalize [file join $script_dir ..]]
+# set proj_name  basys3_riscv
+# set proj_dir   [file join $script_dir project]
+# set src_dir    [file join $repo_root src]
+# set constr_dir [file join $repo_root constraints]
+# file mkdir $proj_dir
+# create_project -force $proj_name $proj_dir -part xc7a35tcpg236-1
+create_project: Time (s): cpu = 00:00:10 ; elapsed = 00:00:11 . Memory (MB): peak = 526.359 ; gain = 219.395
+# set design_sources [list \
+#   [file join $src_dir basys3_riscv_top.sv] \
+#   [file join $src_dir uart_tx.sv] \
+#   [file join $src_dir riscv_cpu_top.sv] \
+#   [file join $src_dir program_counter.sv] \
+#   [file join $src_dir simple_memory.sv] \
+#   [file join $src_dir pipeline_if_id.sv] \
+#   [file join $src_dir pipeline_id_ex.sv] \
+#   [file join $src_dir pipeline_ex_mem.sv] \
+#   [file join $src_dir pipeline_mem_wb.sv] \
+#   [file join $src_dir control_unit.sv] \
+#   [file join $src_dir register_file.sv] \
+#   [file join $src_dir immediate_generator.sv] \
+#   [file join $src_dir forwarding_unit.sv] \
+#   [file join $src_dir riscv_alu.sv] \
+#   [file join $src_dir branch_unit.sv] \
+#   [file join $src_dir load_store_unit.sv] \
+# ]
+# set mem_init [file join $src_dir imem_program.hex]
+# add_files -fileset sources_1 $design_sources
+# add_files -fileset sources_1 $mem_init
+# add_files -fileset constrs_1 [file join $constr_dir basys3_riscv.xdc]
+# set_property top basys3_riscv_top [current_fileset]
+# update_compile_order -fileset sources_1
+# puts "Project created: $proj_dir"
+Project created: C:/Users/minja/OneDrive/Documents/GitHub/5-Stage-Pipeline-RISC-V/vivado/project
+# puts "Top: basys3_riscv_top"
+Top: basys3_riscv_top
+# puts "Next: launch_runs synth_1 impl_1 -to_step write_bitstream -jobs 4"
+Next: launch_runs synth_1 impl_1 -to_step write_bitstream -jobs 4
+# puts "  Or use GUI: Open project, Run Synthesis, Implementation, Generate Bitstream."
+  Or use GUI: Open project, Run Synthesis, Implementation, Generate Bitstream.
+INFO: [Common 17-206] Exiting Vivado at Thu Apr  2 20:48:56 2026...
