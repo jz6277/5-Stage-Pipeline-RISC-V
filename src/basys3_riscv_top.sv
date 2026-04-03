@@ -1,5 +1,5 @@
 // Basys3 board wrapper: 100 MHz input, divided CPU clock, synchronized reset,
-// LED heartbeat, and UART register dump once the program reaches a sentinel.
+// state LEDs, and UART register dump once the program reaches a sentinel.
 
 module basys3_riscv_top #(
     parameter int unsigned CLK_DIV_HALF = 2,     // CPU f = 100MHz/(2*CLK_DIV_HALF); use >= 2
@@ -31,28 +31,79 @@ module basys3_riscv_top #(
             hex_ascii = 8'h41 + (nibble - 4'd10);
     endfunction
 
-    function automatic logic [7:0] dump_char(
+    function automatic logic [3:0] reg_idx_digits(input logic [4:0] reg_idx);
+        reg_idx_digits = (reg_idx >= 5'd10) ? 4'd2 : 4'd1;
+    endfunction
+
+    function automatic logic [3:0] hex_digit_count(input logic [31:0] reg_value);
+        // Always print the full 32-bit register value as 8 hex digits.
+        hex_digit_count = 4'd8;
+    endfunction
+
+    function automatic logic [7:0] reg_idx_char(
+        input logic [4:0] reg_idx,
+        input logic [3:0] digit_idx
+    );
+        if (reg_idx >= 5'd10) begin
+            if (digit_idx == 4'd0)
+                reg_idx_char = 8'h30 + (reg_idx / 5'd10);
+            else
+                reg_idx_char = 8'h30 + (reg_idx % 5'd10);
+        end else begin
+            reg_idx_char = 8'h30 + reg_idx;
+        end
+    endfunction
+
+    function automatic logic [3:0] hex_digit_at(
+        input logic [31:0] reg_value,
+        input logic [3:0]  digit_idx,
+        input logic [3:0]  digit_count
+    );
+        int unsigned shift_amount;
+        begin
+            shift_amount = (digit_count - digit_idx - 4'd1) * 4;
+            hex_digit_at = logic'((reg_value >> shift_amount) & 32'hF);
+        end
+    endfunction
+
+    function automatic logic [4:0] dump_last_char_idx(
         input logic [4:0]  reg_idx,
-        input logic [3:0]  char_idx,
         input logic [31:0] reg_value
     );
+        dump_last_char_idx = 5'd7 + reg_idx_digits(reg_idx) + hex_digit_count(reg_value);
+    endfunction
+
+    function automatic logic [7:0] dump_char(
+        input logic [4:0]  reg_idx,
+        input logic [4:0]  char_idx,
+        input logic [31:0] reg_value
+    );
+        logic [3:0] reg_digit_count;
+        logic [3:0] value_digit_count;
         begin
-            case (char_idx)
-                4'd0:  dump_char = "x";
-                4'd1:  dump_char = 8'h30 + (reg_idx / 5'd10);
-                4'd2:  dump_char = 8'h30 + (reg_idx % 5'd10);
-                4'd3:  dump_char = "=";
-                4'd4:  dump_char = hex_ascii(reg_value[31:28]);
-                4'd5:  dump_char = hex_ascii(reg_value[27:24]);
-                4'd6:  dump_char = hex_ascii(reg_value[23:20]);
-                4'd7:  dump_char = hex_ascii(reg_value[19:16]);
-                4'd8:  dump_char = hex_ascii(reg_value[15:12]);
-                4'd9:  dump_char = hex_ascii(reg_value[11:8]);
-                4'd10: dump_char = hex_ascii(reg_value[7:4]);
-                4'd11: dump_char = hex_ascii(reg_value[3:0]);
-                4'd12: dump_char = 8'h0D;
-                default: dump_char = 8'h0A;
-            endcase
+            reg_digit_count = reg_idx_digits(reg_idx);
+            value_digit_count = hex_digit_count(reg_value);
+
+            if (char_idx == 5'd0)
+                dump_char = "x";
+            else if (char_idx <= reg_digit_count)
+                dump_char = reg_idx_char(reg_idx, char_idx - 5'd1);
+            else if (char_idx == (5'd1 + reg_digit_count))
+                dump_char = " ";
+            else if (char_idx == (5'd2 + reg_digit_count))
+                dump_char = "=";
+            else if (char_idx == (5'd3 + reg_digit_count))
+                dump_char = " ";
+            else if (char_idx == (5'd4 + reg_digit_count))
+                dump_char = "0";
+            else if (char_idx == (5'd5 + reg_digit_count))
+                dump_char = "x";
+            else if (char_idx < (5'd6 + reg_digit_count + value_digit_count))
+                dump_char = hex_ascii(hex_digit_at(reg_value, char_idx - (5'd6 + reg_digit_count), value_digit_count));
+            else if (char_idx == (5'd6 + reg_digit_count + value_digit_count))
+                dump_char = 8'h0D;
+            else
+                dump_char = 8'h0A;
         end
     endfunction
 
@@ -71,7 +122,10 @@ module basys3_riscv_top #(
     logic cpu_clk;
     logic cpu_halt;
     logic cpu_debug_done;
+    logic cpu_debug_done_meta, cpu_debug_done_sync;
     logic [32*32-1:0] cpu_debug_regs_flat;
+    logic [32*32-1:0] dump_regs_flat_snapshot;
+    logic dump_snapshot_pending, dump_snapshot_valid;
 
     always_ff @(posedge CLK100MHZ) begin
         if (cpu_reset) begin
@@ -91,8 +145,35 @@ module basys3_riscv_top #(
     always_ff @(posedge CLK100MHZ) begin
         if (cpu_reset)
             cpu_halt <= 1'b0;
-        else if (cpu_debug_done)
+        else if (cpu_debug_done_sync)
             cpu_halt <= 1'b1;
+    end
+
+    always_ff @(posedge CLK100MHZ) begin
+        if (cpu_reset) begin
+            cpu_debug_done_meta <= 1'b0;
+            cpu_debug_done_sync <= 1'b0;
+        end else begin
+            cpu_debug_done_meta <= cpu_debug_done;
+            cpu_debug_done_sync <= cpu_debug_done_meta;
+        end
+    end
+
+    always_ff @(posedge CLK100MHZ) begin
+        if (cpu_reset) begin
+            dump_regs_flat_snapshot <= '0;
+            dump_snapshot_pending   <= 1'b0;
+            dump_snapshot_valid     <= 1'b0;
+        end else begin
+            if (cpu_debug_done_sync && !cpu_halt && !dump_snapshot_valid)
+                dump_snapshot_pending <= 1'b1;
+
+            if (dump_snapshot_pending) begin
+                dump_regs_flat_snapshot <= cpu_debug_regs_flat;
+                dump_snapshot_pending   <= 1'b0;
+                dump_snapshot_valid     <= 1'b1;
+            end
+        end
     end
 
     riscv_cpu_top cpu (
@@ -104,22 +185,15 @@ module basys3_riscv_top #(
 
     defparam cpu.imem.INIT_FILE = "imem_program.hex";
 
-    logic [23:0] hb_ctr;
-    always_ff @(posedge cpu_clk) begin
-        if (cpu_reset)
-            hb_ctr <= '0;
-        else
-            hb_ctr <= hb_ctr + 24'd1;
-    end
-
     logic [7:0] tx_data;
     logic       tx_valid, tx_busy;
     logic       dump_active, dump_finished;
+    logic       led_execute, led_output;
     logic [4:0] dump_reg_idx;
-    logic [3:0] dump_char_idx;
+    logic [4:0] dump_char_idx;
     logic [31:0] dump_reg_value;
 
-    assign dump_reg_value = get_debug_reg(cpu_debug_regs_flat, dump_reg_idx);
+    assign dump_reg_value = get_debug_reg(dump_regs_flat_snapshot, dump_reg_idx);
 
     always_ff @(posedge CLK100MHZ) begin
         if (cpu_reset) begin
@@ -128,20 +202,17 @@ module basys3_riscv_top #(
             dump_active   <= 1'b0;
             dump_finished <= 1'b0;
             dump_reg_idx  <= 5'd0;
-            dump_char_idx <= 4'd0;
+            dump_char_idx <= 5'd0;
         end else begin
             tx_valid <= 1'b0;
 
-            if (!dump_active && !dump_finished && cpu_halt) begin
+            if (!dump_active && !dump_finished && dump_snapshot_valid) begin
                 dump_active   <= 1'b1;
                 dump_reg_idx  <= 5'd0;
-                dump_char_idx <= 4'd0;
+                dump_char_idx <= 5'd0;
             end else if (dump_active && !tx_busy) begin
-                tx_data  <= dump_char(dump_reg_idx, dump_char_idx, dump_reg_value);
-                tx_valid <= 1'b1;
-
-                if (dump_char_idx == 4'd13) begin
-                    dump_char_idx <= 4'd0;
+                if (dump_reg_value == 32'd0) begin
+                    dump_char_idx <= 5'd0;
                     if (dump_reg_idx == LAST_REG_IDX) begin
                         dump_active   <= 1'b0;
                         dump_finished <= 1'b1;
@@ -149,7 +220,20 @@ module basys3_riscv_top #(
                         dump_reg_idx <= dump_reg_idx + 5'd1;
                     end
                 end else begin
-                    dump_char_idx <= dump_char_idx + 4'd1;
+                    tx_data  <= dump_char(dump_reg_idx, dump_char_idx, dump_reg_value);
+                    tx_valid <= 1'b1;
+
+                    if (dump_char_idx == dump_last_char_idx(dump_reg_idx, dump_reg_value)) begin
+                        dump_char_idx <= 5'd0;
+                        if (dump_reg_idx == LAST_REG_IDX) begin
+                            dump_active   <= 1'b0;
+                            dump_finished <= 1'b1;
+                        end else begin
+                            dump_reg_idx <= dump_reg_idx + 5'd1;
+                        end
+                    end else begin
+                        dump_char_idx <= dump_char_idx + 5'd1;
+                    end
                 end
             end
         end
@@ -166,8 +250,8 @@ module basys3_riscv_top #(
         .tx(RsTx)
     );
 
-    assign led = cpu_halt
-        ? {13'd0, dump_finished, dump_active, tx_busy}
-        : {hb_ctr[23:16], hb_ctr[15:8]};
+    assign led_execute = !cpu_reset && !cpu_halt;
+    assign led_output  = dump_active;
+    assign led = {14'd0, led_output, led_execute};
 
 endmodule
