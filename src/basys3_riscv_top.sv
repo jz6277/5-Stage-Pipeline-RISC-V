@@ -62,7 +62,7 @@ module basys3_riscv_top #(
         int unsigned shift_amount;
         begin
             shift_amount = (digit_count - digit_idx - 4'd1) * 4;
-            hex_digit_at = logic'((reg_value >> shift_amount) & 32'hF);
+            hex_digit_at = reg_value[shift_amount +: 4];
         end
     endfunction
 
@@ -192,6 +192,7 @@ module basys3_riscv_top #(
     logic [4:0] dump_reg_idx;
     logic [4:0] dump_char_idx;
     logic [31:0] dump_reg_value;
+    logic       tx_byte_ready;
 
     assign dump_reg_value = get_debug_reg(dump_regs_flat_snapshot, dump_reg_idx);
 
@@ -199,6 +200,7 @@ module basys3_riscv_top #(
         if (cpu_reset) begin
             tx_data       <= 8'h00;
             tx_valid      <= 1'b0;
+            tx_byte_ready <= 1'b0;
             dump_active   <= 1'b0;
             dump_finished <= 1'b0;
             dump_reg_idx  <= 5'd0;
@@ -207,11 +209,15 @@ module basys3_riscv_top #(
             tx_valid <= 1'b0;
 
             if (!dump_active && !dump_finished && dump_snapshot_valid) begin
+                tx_byte_ready <= 1'b0;
                 dump_active   <= 1'b1;
                 dump_reg_idx  <= 5'd0;
                 dump_char_idx <= 5'd0;
             end else if (dump_active && !tx_busy) begin
-                if (dump_reg_value == 32'd0) begin
+                if (tx_byte_ready) begin
+                    tx_valid      <= 1'b1;
+                    tx_byte_ready <= 1'b0;
+                end else if (dump_reg_value == 32'd0) begin
                     dump_char_idx <= 5'd0;
                     if (dump_reg_idx == LAST_REG_IDX) begin
                         dump_active   <= 1'b0;
@@ -220,8 +226,8 @@ module basys3_riscv_top #(
                         dump_reg_idx <= dump_reg_idx + 5'd1;
                     end
                 end else begin
-                    tx_data  <= dump_char(dump_reg_idx, dump_char_idx, dump_reg_value);
-                    tx_valid <= 1'b1;
+                    tx_data       <= dump_char(dump_reg_idx, dump_char_idx, dump_reg_value);
+                    tx_byte_ready <= 1'b1;
 
                     if (dump_char_idx == dump_last_char_idx(dump_reg_idx, dump_reg_value)) begin
                         dump_char_idx <= 5'd0;
