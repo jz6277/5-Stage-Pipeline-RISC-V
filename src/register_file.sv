@@ -17,7 +17,8 @@ module register_file (
     // Write Port (rd)
     input  logic        write_enable,   // Write enable
     input  logic [4:0]  write_addr,     // Write address (rd)
-    input  logic [31:0] write_data      // Write data
+    input  logic [31:0] write_data,     // Write data
+    output logic [32*32-1:0] debug_regs_flat
 );
 
     // Register array: 32 registers of 32 bits each
@@ -44,6 +45,12 @@ module register_file (
         end else if (write_enable && (write_addr != 5'd0)) begin
             // Write to register (except x0)
             registers[write_addr] <= write_data;
+        end
+    end
+
+    always_comb begin
+        for (int i = 0; i < 32; i = i + 1) begin
+            debug_regs_flat[i*32 +: 32] = (i == 0) ? 32'd0 : registers[i];
         end
     end
 

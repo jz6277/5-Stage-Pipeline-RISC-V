@@ -4,8 +4,14 @@
 
 module riscv_cpu_top (
     input  logic clock,
-    input  logic reset
+    input  logic reset,
+    output logic debug_done,
+    output logic [32*32-1:0] debug_regs_flat
 );
+
+    localparam logic [31:0] DEBUG_SENTINEL = 32'hFFFF_FFFF;
+    localparam logic [1:0]  DEBUG_DRAIN_CYCLES = 2'd3;
+    logic [1:0] debug_drain_count;
 
     // ========== Instruction Fetch (IF) Stage ==========
     logic [31:0] pc_if, pc_plus4_if, instruction_if;
@@ -104,7 +110,8 @@ module riscv_cpu_top (
         .read_data2(read_data2_id),
         .write_enable(reg_write_wb),
         .write_addr(rd_wb),
-        .write_data(write_data_wb)
+        .write_data(write_data_wb),
+        .debug_regs_flat(debug_regs_flat)
     );
     
     // Immediate Generator
@@ -350,6 +357,21 @@ module riscv_cpu_top (
             2'b10: write_data_wb = pc_plus4_wb;        // PC+4 (for JAL/JALR)
             default: write_data_wb = alu_result_wb;
         endcase
+    end
+
+    always_ff @(posedge clock) begin
+        if (reset) begin
+            debug_done <= 1'b0;
+            debug_drain_count <= '0;
+        end else if (!debug_done) begin
+            if (debug_drain_count != '0) begin
+                if (debug_drain_count == 2'd1)
+                    debug_done <= 1'b1;
+                debug_drain_count <= debug_drain_count - 2'd1;
+            end else if (instruction_id == DEBUG_SENTINEL) begin
+                debug_drain_count <= DEBUG_DRAIN_CYCLES;
+            end
+        end
     end
 
 endmodule

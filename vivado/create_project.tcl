@@ -16,6 +16,7 @@ create_project -force $proj_name $proj_dir -part xc7a35tcpg236-1
 
 set design_sources [list \
   [file join $src_dir basys3_riscv_top.sv] \
+  [file join $src_dir uart_tx.sv] \
   [file join $src_dir riscv_cpu_top.sv] \
   [file join $src_dir program_counter.sv] \
   [file join $src_dir simple_memory.sv] \

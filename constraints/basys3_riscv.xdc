@@ -28,4 +28,7 @@ set_property -dict { PACKAGE_PIN N3    IOSTANDARD LVCMOS33 } [get_ports {led[13]
 set_property -dict { PACKAGE_PIN P1    IOSTANDARD LVCMOS33 } [get_ports {led[14]}]
 set_property -dict { PACKAGE_PIN L1    IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
 
+## USB-UART bridge (FPGA TX -> PC)
+set_property -dict { PACKAGE_PIN A18   IOSTANDARD LVCMOS33 } [get_ports RsTx]
+
 ## CPU runs on divided clock generated inside basys3_riscv_top (do not constrain as primary clock)
