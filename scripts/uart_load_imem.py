@@ -9,6 +9,10 @@ Protocol on the wire:
 Input formats:
 - text hex bytes, like the existing `imem_program.hex`
 - raw binary
+
+RX capture uses a background reader thread that starts just before ``write()`` so bytes
+from the FPGA are not missed while the host is still flushing the USB TX queue.
+``--read-after 0`` means send only.
 """
 
 from __future__ import annotations
@@ -19,6 +23,7 @@ import pathlib
 import re
 import struct
 import sys
+import threading
 import time
 
 try:
@@ -69,6 +74,37 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=0.2,
         help="Seconds to wait after opening the port before sending. Default: 0.2.",
+    )
+    parser.add_argument(
+        "--read-after",
+        type=float,
+        default=30.0,
+        metavar="SEC",
+        help=(
+            "After flush, keep capturing RX for up to this many seconds (reader thread). "
+            "Default: 30. Use 0 to skip."
+        ),
+    )
+    parser.add_argument(
+        "--read-idle",
+        type=float,
+        default=2.0,
+        metavar="SEC",
+        help=(
+            "Stop once this many seconds pass with no growth in captured length "
+            "(after at least one byte). Default: 2. Use 0 to always use full --read-after."
+        ),
+    )
+    parser.add_argument(
+        "--rx-file",
+        type=pathlib.Path,
+        metavar="PATH",
+        help="Also write all captured RX bytes to this file (debug).",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Log capture progress to stderr.",
     )
     return parser.parse_args()
 
@@ -154,14 +190,92 @@ def main() -> int:
     print(f"Word count: {word_count}")
     print(f"Port: {args.port} @ {args.baud}")
 
-    with serial.Serial(args.port, args.baud, timeout=1) as ser:
+    with serial.Serial(args.port, args.baud, timeout=0.05) as ser:
+        try:
+            ser.dtr = False
+            ser.rts = False
+        except (AttributeError, OSError):
+            pass
         ser.reset_input_buffer()
         ser.reset_output_buffer()
         time.sleep(args.startup_delay)
+
+        rx_buf = bytearray()
+        rx_lock = threading.Lock()
+        stop_reader = threading.Event()
+
+        def reader_loop() -> None:
+            while not stop_reader.is_set():
+                try:
+                    # Prefer draining driver queue when the OS reports bytes waiting.
+                    n = ser.in_waiting
+                    to_read = min(4096, max(n, 1)) if n else 4096
+                    chunk = ser.read(to_read)
+                except (serial.SerialException, OSError):
+                    break
+                if chunk:
+                    with rx_lock:
+                        rx_buf.extend(chunk)
+                    if args.verbose:
+                        print(f"[rx +{len(chunk)} -> {len(rx_buf)} total]", file=sys.stderr)
+
+        if args.read_after and args.read_after > 0:
+            reader = threading.Thread(target=reader_loop, name="uart_rx", daemon=True)
+            reader.start()
+            time.sleep(0.01)
+
         ser.write(payload)
         ser.flush()
+        print("Transfer complete.")
 
-    print("Transfer complete.")
+        if args.read_after and args.read_after > 0:
+            t0 = time.time()
+            last_len = 0
+            last_change = time.time()
+
+            while time.time() - t0 < args.read_after:
+                time.sleep(0.05)
+                with rx_lock:
+                    cur = len(rx_buf)
+                if cur > last_len:
+                    last_len = cur
+                    last_change = time.time()
+                elif (
+                    args.read_idle > 0
+                    and last_len > 0
+                    and (time.time() - last_change) >= args.read_idle
+                ):
+                    if args.verbose:
+                        print("[rx idle exit]", file=sys.stderr)
+                    break
+
+            stop_reader.set()
+            reader.join(timeout=2.0)
+
+            with rx_lock:
+                rx = bytes(rx_buf)
+
+            if args.rx_file is not None:
+                args.rx_file.write_bytes(rx)
+                print(f"Wrote {len(rx)} bytes to {args.rx_file}", file=sys.stderr)
+
+            print("--- UART RX ---", file=sys.stderr)
+            if rx:
+                sys.stdout.buffer.write(rx)
+                sys.stdout.buffer.flush()
+                if not rx.endswith(b"\n"):
+                    sys.stdout.write("\n")
+                    sys.stdout.flush()
+            else:
+                print(
+                    "(no bytes captured)\n"
+                    "  Same USB cable carries host TX->FPGA RX and FPGA TX->host RX; "
+                    "if the board TX LED blinks but this stays empty, try another COM "
+                    "port, close other serial monitors, or --rx-file / --verbose.",
+                    file=sys.stderr,
+                )
+            print("--- end ---", file=sys.stderr)
+
     return 0
 
 
