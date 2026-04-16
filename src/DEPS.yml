@@ -76,3 +76,43 @@ cpu_top_test:
     - riscv_cpu_top.sv
     - tb_riscv_cpu_top.sv
   top: tb_riscv_cpu_top
+
+# Focused CPU test for backward JAL and BEQ control flow
+cpu_backward_control_flow_test:
+  deps:
+    - program_counter.sv
+    - simple_memory.sv
+    - pipeline_if_id.sv
+    - control_unit.sv
+    - register_file.sv
+    - immediate_generator.sv
+    - pipeline_id_ex.sv
+    - riscv_alu.sv
+    - branch_unit.sv
+    - forwarding_unit.sv
+    - pipeline_ex_mem.sv
+    - load_store_unit.sv
+    - pipeline_mem_wb.sv
+    - riscv_cpu_top.sv
+    - tb_cpu_backward_control_flow.sv
+  top: tb_cpu_backward_control_flow
+
+# Focused CPU test for a WB-to-ID branch hazard case
+branch_wb_id_hazard_test:
+  deps:
+    - program_counter.sv
+    - simple_memory.sv
+    - pipeline_if_id.sv
+    - control_unit.sv
+    - register_file.sv
+    - immediate_generator.sv
+    - pipeline_id_ex.sv
+    - riscv_alu.sv
+    - branch_unit.sv
+    - forwarding_unit.sv
+    - pipeline_ex_mem.sv
+    - load_store_unit.sv
+    - pipeline_mem_wb.sv
+    - riscv_cpu_top.sv
+    - tb_branch_wb_id_hazard.sv
+  top: tb_branch_wb_id_hazard

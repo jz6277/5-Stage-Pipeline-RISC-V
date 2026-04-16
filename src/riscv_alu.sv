@@ -50,10 +50,10 @@ module riscv_alu (
     // =====================================================
     // Adder/Subtractor (32-bit ripple-carry using full adders)
     // =====================================================
-    // For subtraction, invert A and set carry_in = 1 (computing B - A instead of A - B)
+    // For subtraction, invert B and set carry_in = 1 to compute A - B.
     generate
         for (i = 0; i < 32; i = i + 1) begin : invert_b
-            xor (b_inverted[i], operand_a[i], is_sub);
+            xor (b_inverted[i], operand_b[i], is_sub);
         end
     endgenerate
 
@@ -66,7 +66,7 @@ module riscv_alu (
     generate
         for (i = 0; i < 32; i = i + 1) begin : full_adders
             full_adder fa (
-                .a(operand_b[i]),
+                .a(operand_a[i]),
                 .b(b_input[i]),
                 .cin(carry[i]),
                 .sum(add_sub_result[i]),

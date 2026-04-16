@@ -1,0 +1,6 @@
+---
+description: 
+alwaysApply: true
+---
+
+if vivado is needed, use C:\AMDDesignTools\2025.2\Vivado\bin\unwrapped\win64.o

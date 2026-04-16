@@ -60,7 +60,7 @@ module riscv_cpu_top (
 
     // ========== Instruction Decode (ID) Stage ==========
     logic [4:0]  rs1_id, rs2_id, rd_id;
-    logic [31:0] read_data1_id, read_data2_id, immediate_id;
+    logic [31:0] read_data1_rf, read_data2_rf, read_data1_id, read_data2_id, immediate_id;
     logic [2:0]  funct3_id, imm_src_id;
     logic        reg_write_id, mem_read_id, mem_write_id, branch_id, jump_id;
     logic [3:0]  alu_op_id;
@@ -95,9 +95,9 @@ module riscv_cpu_top (
         .clock(clock),
         .reset(reset),
         .read_addr1(rs1_id),
-        .read_data1(read_data1_id),
+        .read_data1(read_data1_rf),
         .read_addr2(rs2_id),
-        .read_data2(read_data2_id),
+        .read_data2(read_data2_rf),
         .write_enable(reg_write_wb),
         .write_addr(rd_wb),
         .write_data(write_data_wb),
@@ -318,7 +318,7 @@ module riscv_cpu_top (
     );
 
     // ========== MEM/WB Pipeline Register ==========
-    logic [31:0] alu_result_wb, mem_read_data_wb, pc_plus4_wb;
+    logic [31:0] alu_result_wb, mem_read_data_wb, pc_plus4_wb, write_data_ex_stage, write_data_mem_stage;
     logic [1:0]  result_src_wb;
     
     pipeline_mem_wb mem_wb_reg (
@@ -341,6 +341,14 @@ module riscv_cpu_top (
     // ========== Writeback (WB) Stage ==========
     // Result mux
     always_comb begin
+        case (result_src_ex)
+            2'b00: write_data_ex_stage = alu_result_ex;
+            2'b10: write_data_ex_stage = pc_plus4_ex;
+            default: write_data_ex_stage = 32'h0;
+        endcase
+    end
+
+    always_comb begin
         case (result_src_wb)
             2'b00: write_data_wb = alu_result_wb;      // ALU result
             2'b01: write_data_wb = mem_read_data_wb;   // Memory data
@@ -348,6 +356,29 @@ module riscv_cpu_top (
             default: write_data_wb = alu_result_wb;
         endcase
     end
+
+    // Decode-stage bypassing covers same-cycle read-after-write hazards that
+    // are not visible through the plain register file array read.
+    always_comb begin
+        case (result_src_mem)
+            2'b00: write_data_mem_stage = alu_result_mem;
+            2'b01: write_data_mem_stage = lsu_load_data;
+            2'b10: write_data_mem_stage = pc_plus4_mem;
+            default: write_data_mem_stage = alu_result_mem;
+        endcase
+    end
+
+    assign read_data1_id = (rs1_id == 5'd0) ? 32'd0 :
+                           (reg_write_ex && (rd_ex != 5'd0) && (rd_ex == rs1_id) && (result_src_ex != 2'b01)) ? write_data_ex_stage :
+                           (reg_write_mem && (rd_mem != 5'd0) && (rd_mem == rs1_id)) ? write_data_mem_stage :
+                           (reg_write_wb && (rd_wb != 5'd0) && (rd_wb == rs1_id)) ? write_data_wb :
+                           read_data1_rf;
+
+    assign read_data2_id = (rs2_id == 5'd0) ? 32'd0 :
+                           (reg_write_ex && (rd_ex != 5'd0) && (rd_ex == rs2_id) && (result_src_ex != 2'b01)) ? write_data_ex_stage :
+                           (reg_write_mem && (rd_mem != 5'd0) && (rd_mem == rs2_id)) ? write_data_mem_stage :
+                           (reg_write_wb && (rd_wb != 5'd0) && (rd_wb == rs2_id)) ? write_data_wb :
+                           read_data2_rf;
 
     always_ff @(posedge clock) begin
         if (reset) begin
