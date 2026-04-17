@@ -389,7 +389,7 @@ module riscv_cpu_top (
                 if (debug_drain_count == 2'd1)
                     debug_done <= 1'b1;
                 debug_drain_count <= debug_drain_count - 2'd1;
-            end else if (instruction_id == DEBUG_SENTINEL) begin
+            end else if (instruction_id == DEBUG_SENTINEL && !pc_branch_sel) begin
                 debug_drain_count <= DEBUG_DRAIN_CYCLES;
             end
         end
