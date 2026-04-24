@@ -1,0 +1,353 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1520 980" font-family="Helvetica, Arial, sans-serif">
+  <!-- =============================== STYLES =============================== -->
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333"/>
+    </marker>
+    <marker id="arrCtrl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c62828"/>
+    </marker>
+    <marker id="arrFwd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ef6c00"/>
+    </marker>
+    <marker id="arrBr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6a1b9a"/>
+    </marker>
+    <marker id="arrWb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1565c0"/>
+    </marker>
+
+    <linearGradient id="stageIF" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e3f2fd"/><stop offset="100%" stop-color="#bbdefb"/>
+    </linearGradient>
+    <linearGradient id="stageID" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8f5e9"/><stop offset="100%" stop-color="#c8e6c9"/>
+    </linearGradient>
+    <linearGradient id="stageEX" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff8e1"/><stop offset="100%" stop-color="#ffe0b2"/>
+    </linearGradient>
+    <linearGradient id="stageMEM" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fce4ec"/><stop offset="100%" stop-color="#f8bbd0"/>
+    </linearGradient>
+    <linearGradient id="stageWB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f3e5f5"/><stop offset="100%" stop-color="#e1bee7"/>
+    </linearGradient>
+    <linearGradient id="regGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eceff1"/><stop offset="100%" stop-color="#cfd8dc"/>
+    </linearGradient>
+
+    <style>
+      .title { font-size: 22px; font-weight: 700; fill: #1a1a1a; }
+      .subtitle { font-size: 13px; fill: #555; }
+      .stage-lbl { font-size: 16px; font-weight: 700; fill: #0d47a1; }
+      .mod { font-size: 13px; font-weight: 700; fill: #111; }
+      .mod-sub { font-size: 10px; fill: #555; font-style: italic; }
+      .sig { font-size: 10px; fill: #222; }
+      .sig-ctrl { font-size: 10px; fill: #b71c1c; font-weight: 600; }
+      .sig-fwd  { font-size: 10px; fill: #bf360c; font-weight: 600; }
+      .sig-br   { font-size: 10px; fill: #4a148c; font-weight: 600; }
+      .sig-wb   { font-size: 10px; fill: #0d47a1; font-weight: 600; }
+      .legend-lbl { font-size: 12px; fill: #222; }
+      .arr-data { stroke: #333; stroke-width: 1.8; fill: none; }
+      .arr-ctrl { stroke: #c62828; stroke-width: 1.8; fill: none; stroke-dasharray: 6 3; }
+      .arr-fwd  { stroke: #ef6c00; stroke-width: 1.8; fill: none; stroke-dasharray: 2 3; }
+      .arr-br   { stroke: #6a1b9a; stroke-width: 2;   fill: none; }
+      .arr-wb   { stroke: #1565c0; stroke-width: 2;   fill: none; stroke-dasharray: 8 3; }
+      .box { stroke: #37474f; stroke-width: 1.5; rx: 8; ry: 8; }
+      .stage-box { stroke: #90a4ae; stroke-width: 1; stroke-dasharray: 4 3; fill: none; rx: 10; ry: 10; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="760" y="34" text-anchor="middle" class="title">RISC-V CPU — Module Interconnection Diagram</text>
+  <text x="760" y="54" text-anchor="middle" class="subtitle">How each SystemVerilog module in riscv_cpu_top.sv talks to its neighbours across the 5 pipeline stages</text>
+
+  <!-- ======================= LEGEND ======================= -->
+  <g transform="translate(20,70)">
+    <rect x="0" y="0" width="1480" height="38" rx="8" ry="8" fill="#fafafa" stroke="#cfd8dc"/>
+    <g transform="translate(14,22)">
+      <line x1="0" y1="0" x2="40" y2="0" class="arr-data" marker-end="url(#arr)"/>
+      <text x="48" y="4" class="legend-lbl">Datapath signal</text>
+    </g>
+    <g transform="translate(200,22)">
+      <line x1="0" y1="0" x2="40" y2="0" class="arr-ctrl" marker-end="url(#arrCtrl)"/>
+      <text x="48" y="4" class="legend-lbl">Control signal</text>
+    </g>
+    <g transform="translate(380,22)">
+      <line x1="0" y1="0" x2="40" y2="0" class="arr-fwd" marker-end="url(#arrFwd)"/>
+      <text x="48" y="4" class="legend-lbl">Forwarding path</text>
+    </g>
+    <g transform="translate(570,22)">
+      <line x1="0" y1="0" x2="40" y2="0" class="arr-br" marker-end="url(#arrBr)"/>
+      <text x="48" y="4" class="legend-lbl">Branch / PC-update path</text>
+    </g>
+    <g transform="translate(790,22)">
+      <line x1="0" y1="0" x2="40" y2="0" class="arr-wb" marker-end="url(#arrWb)"/>
+      <text x="48" y="4" class="legend-lbl">Writeback path</text>
+    </g>
+    <g transform="translate(980,22)">
+      <rect x="0" y="-10" width="22" height="16" fill="url(#regGrad)" stroke="#37474f"/>
+      <text x="30" y="4" class="legend-lbl">Pipeline register (IF/ID, ID/EX, EX/MEM, MEM/WB)</text>
+    </g>
+  </g>
+
+  <!-- ======================= STAGE BANDS ======================= -->
+  <rect x="20"   y="130" width="270" height="610" class="stage-box" fill="url(#stageIF)"  fill-opacity="0.35"/>
+  <rect x="300"  y="130" width="300" height="610" class="stage-box" fill="url(#stageID)"  fill-opacity="0.35"/>
+  <rect x="610"  y="130" width="310" height="610" class="stage-box" fill="url(#stageEX)"  fill-opacity="0.35"/>
+  <rect x="930"  y="130" width="310" height="610" class="stage-box" fill="url(#stageMEM)" fill-opacity="0.35"/>
+  <rect x="1250" y="130" width="250" height="610" class="stage-box" fill="url(#stageWB)"  fill-opacity="0.35"/>
+
+  <text x="155"  y="155" text-anchor="middle" class="stage-lbl">IF — Instruction Fetch</text>
+  <text x="450"  y="155" text-anchor="middle" class="stage-lbl">ID — Instruction Decode</text>
+  <text x="765"  y="155" text-anchor="middle" class="stage-lbl">EX — Execute</text>
+  <text x="1085" y="155" text-anchor="middle" class="stage-lbl">MEM — Memory</text>
+  <text x="1375" y="155" text-anchor="middle" class="stage-lbl">WB — Writeback</text>
+
+  <!-- ======================= MODULES ======================= -->
+
+  <!-- IF stage -->
+  <g>
+    <rect x="50" y="210" width="170" height="70" class="box" fill="url(#stageIF)"/>
+    <text x="135" y="238" text-anchor="middle" class="mod">program_counter</text>
+    <text x="135" y="258" text-anchor="middle" class="mod-sub">pc_if / pc_enable</text>
+  </g>
+  <g>
+    <rect x="50" y="360" width="170" height="70" class="box" fill="url(#stageIF)"/>
+    <text x="135" y="388" text-anchor="middle" class="mod">instruction_data</text>
+    <text x="135" y="408" text-anchor="middle" class="mod-sub">(external instr. memory)</text>
+  </g>
+  <!-- IF/ID register -->
+  <g>
+    <rect x="238" y="250" width="42" height="180" class="box" fill="url(#regGrad)"/>
+    <text x="259" y="342" text-anchor="middle" class="mod" transform="rotate(-90 259 342)">pipeline_if_id</text>
+  </g>
+
+  <!-- ID stage -->
+  <g>
+    <rect x="320" y="210" width="200" height="70" class="box" fill="url(#stageID)"/>
+    <text x="420" y="238" text-anchor="middle" class="mod">control_unit</text>
+    <text x="420" y="258" text-anchor="middle" class="mod-sub">opcode → ctrl signals</text>
+  </g>
+  <g>
+    <rect x="320" y="335" width="200" height="80" class="box" fill="url(#stageID)"/>
+    <text x="420" y="362" text-anchor="middle" class="mod">register_file</text>
+    <text x="420" y="380" text-anchor="middle" class="mod-sub">rs1/rs2 read, rd write</text>
+    <text x="420" y="396" text-anchor="middle" class="mod-sub">+ internal bypass muxes</text>
+  </g>
+  <g>
+    <rect x="320" y="470" width="200" height="70" class="box" fill="url(#stageID)"/>
+    <text x="420" y="498" text-anchor="middle" class="mod">immediate_generator</text>
+    <text x="420" y="518" text-anchor="middle" class="mod-sub">I / S / B / U / J imm</text>
+  </g>
+  <!-- ID/EX register -->
+  <g>
+    <rect x="548" y="220" width="42" height="350" class="box" fill="url(#regGrad)"/>
+    <text x="569" y="395" text-anchor="middle" class="mod" transform="rotate(-90 569 395)">pipeline_id_ex</text>
+  </g>
+
+  <!-- EX stage -->
+  <g>
+    <rect x="630" y="210" width="200" height="70" class="box" fill="url(#stageEX)"/>
+    <text x="730" y="238" text-anchor="middle" class="mod">forwarding_unit</text>
+    <text x="730" y="258" text-anchor="middle" class="mod-sub">forward_a / forward_b</text>
+  </g>
+  <g>
+    <rect x="630" y="335" width="200" height="80" class="box" fill="url(#stageEX)"/>
+    <text x="730" y="362" text-anchor="middle" class="mod">riscv_alu</text>
+    <text x="730" y="380" text-anchor="middle" class="mod-sub">+ src_a / src_b muxes</text>
+    <text x="730" y="396" text-anchor="middle" class="mod-sub">+ forwarding muxes</text>
+  </g>
+  <g>
+    <rect x="630" y="470" width="200" height="70" class="box" fill="url(#stageEX)"/>
+    <text x="730" y="498" text-anchor="middle" class="mod">branch_unit</text>
+    <text x="730" y="518" text-anchor="middle" class="mod-sub">branch_taken</text>
+  </g>
+  <!-- EX/MEM register -->
+  <g>
+    <rect x="858" y="230" width="42" height="340" class="box" fill="url(#regGrad)"/>
+    <text x="879" y="400" text-anchor="middle" class="mod" transform="rotate(-90 879 400)">pipeline_ex_mem</text>
+  </g>
+
+  <!-- MEM stage -->
+  <g>
+    <rect x="945" y="290" width="210" height="85" class="box" fill="url(#stageMEM)"/>
+    <text x="1050" y="318" text-anchor="middle" class="mod">load_store_unit</text>
+    <text x="1050" y="336" text-anchor="middle" class="mod-sub">addr align + byte enable</text>
+    <text x="1050" y="352" text-anchor="middle" class="mod-sub">sign / zero extend</text>
+  </g>
+  <g>
+    <rect x="945" y="450" width="210" height="75" class="box" fill="url(#stageMEM)"/>
+    <text x="1050" y="478" text-anchor="middle" class="mod">simple_memory (dmem)</text>
+    <text x="1050" y="498" text-anchor="middle" class="mod-sub">byte-enabled D-RAM</text>
+  </g>
+  <!-- MEM/WB register -->
+  <g>
+    <rect x="1180" y="280" width="42" height="230" class="box" fill="url(#regGrad)"/>
+    <text x="1201" y="395" text-anchor="middle" class="mod" transform="rotate(-90 1201 395)">pipeline_mem_wb</text>
+  </g>
+
+  <!-- WB stage -->
+  <g>
+    <rect x="1285" y="330" width="200" height="85" class="box" fill="url(#stageWB)"/>
+    <text x="1385" y="358" text-anchor="middle" class="mod">writeback mux</text>
+    <text x="1385" y="376" text-anchor="middle" class="mod-sub">alu / mem / pc+4</text>
+    <text x="1385" y="394" text-anchor="middle" class="mod-sub">→ write_data_wb</text>
+  </g>
+
+  <!-- ======================= CONNECTIONS ======================= -->
+
+  <!-- IF stage internal feeds to IF/ID -->
+  <!-- PC → IF/ID: pc_if, pc+4 -->
+  <path d="M220 245 L238 275" class="arr-data" marker-end="url(#arr)"/>
+  <text x="225" y="235" class="sig">pc_if, pc+4</text>
+
+  <!-- instruction_data → IF/ID -->
+  <path d="M220 395 L238 405" class="arr-data" marker-end="url(#arr)"/>
+  <text x="225" y="388" class="sig">instruction_if</text>
+
+  <!-- IF/ID → Control Unit (instruction) -->
+  <path d="M280 270 L320 240" class="arr-ctrl" marker-end="url(#arrCtrl)"/>
+  <text x="284" y="262" class="sig-ctrl">instruction[31:0]</text>
+
+  <!-- IF/ID → Register File (rs1, rs2) -->
+  <path d="M280 360 L320 365" class="arr-data" marker-end="url(#arr)"/>
+  <text x="284" y="356" class="sig">rs1, rs2 (addrs)</text>
+
+  <!-- IF/ID → Immediate Generator -->
+  <path d="M280 420 Q 300 480 320 495" class="arr-data" marker-end="url(#arr)"/>
+  <text x="284" y="475" class="sig">instruction</text>
+
+  <!-- IF/ID → ID/EX (pc, pc+4, rd, funct3) -->
+  <path d="M280 420 Q 410 580 548 560" class="arr-data" marker-end="url(#arr)"/>
+  <text x="330" y="570" class="sig">pc, pc+4, rs1, rs2, rd, funct3</text>
+
+  <!-- Control Unit → ID/EX -->
+  <path d="M520 245 L548 245" class="arr-ctrl" marker-end="url(#arrCtrl)"/>
+  <text x="523" y="238" class="sig-ctrl">ctrl bundle</text>
+
+  <!-- Register File → ID/EX -->
+  <path d="M520 370 L548 370" class="arr-data" marker-end="url(#arr)"/>
+  <text x="523" y="363" class="sig">read_data1 / read_data2</text>
+
+  <!-- Immediate Generator → ID/EX -->
+  <path d="M520 500 L548 490" class="arr-data" marker-end="url(#arr)"/>
+  <text x="523" y="512" class="sig">immediate</text>
+
+  <!-- ID/EX → Forwarding Unit (rs1_ex, rs2_ex) -->
+  <path d="M590 245 L630 245" class="arr-data" marker-end="url(#arr)"/>
+  <text x="593" y="238" class="sig">rs1_ex, rs2_ex</text>
+
+  <!-- ID/EX → ALU (operands + alu_op + alu_src) -->
+  <path d="M590 360 L630 360" class="arr-data" marker-end="url(#arr)"/>
+  <text x="593" y="353" class="sig">rd1, rd2, imm, pc</text>
+  <path d="M590 390 L630 390" class="arr-ctrl" marker-end="url(#arrCtrl)"/>
+  <text x="593" y="405" class="sig-ctrl">alu_op, alu_src_a/b</text>
+
+  <!-- ID/EX → Branch Unit -->
+  <path d="M590 490 L630 490" class="arr-data" marker-end="url(#arr)"/>
+  <text x="593" y="483" class="sig">rd1, rd2, funct3</text>
+  <path d="M590 520 L630 520" class="arr-ctrl" marker-end="url(#arrCtrl)"/>
+  <text x="593" y="535" class="sig-ctrl">branch, jump</text>
+
+  <!-- Forwarding Unit → ALU (select signals) -->
+  <path d="M730 280 L730 335" class="arr-fwd" marker-end="url(#arrFwd)"/>
+  <text x="736" y="305" class="sig-fwd">forward_a / forward_b</text>
+
+  <!-- ALU → EX/MEM (alu_result) -->
+  <path d="M830 360 L858 360" class="arr-data" marker-end="url(#arr)"/>
+  <text x="832" y="353" class="sig">alu_result</text>
+
+  <!-- ALU stage → EX/MEM (write_data = forwarded_b) -->
+  <path d="M830 400 L858 400" class="arr-data" marker-end="url(#arr)"/>
+  <text x="832" y="415" class="sig">write_data (= forwarded_b)</text>
+
+  <!-- Branch Unit → PC update (return loop along bottom) -->
+  <path d="M730 540 L730 680 L 135 680 L 135 280" class="arr-br" marker-end="url(#arrBr)"/>
+  <text x="245" y="675" class="sig-br">pc_branch_sel, pc_branch_target  →  PC update / IF+ID flush</text>
+
+  <!-- EX/MEM → Load/Store Unit (addr, store_data, funct3 + control) -->
+  <path d="M900 315 L945 315" class="arr-data" marker-end="url(#arr)"/>
+  <text x="902" y="308" class="sig">addr, store_data, funct3</text>
+  <path d="M900 345 L945 345" class="arr-ctrl" marker-end="url(#arrCtrl)"/>
+  <text x="902" y="360" class="sig-ctrl">mem_read, mem_write</text>
+
+  <!-- Load/Store Unit ↔ Data Memory -->
+  <path d="M1020 375 L1020 450" class="arr-data" marker-end="url(#arr)"/>
+  <text x="940" y="418" class="sig">addr, byte_en,</text>
+  <text x="940" y="430" class="sig">wdata, en, we</text>
+  <path d="M1080 450 L1080 375" class="arr-data" marker-end="url(#arr)"/>
+  <text x="1100" y="418" class="sig">read_data</text>
+
+  <!-- EX/MEM → MEM/WB (alu_result, pc+4, rd + control) -->
+  <path d="M900 265 Q 1060 240 1180 300" class="arr-data" marker-end="url(#arr)"/>
+  <text x="950" y="230" class="sig">alu_result, pc+4, rd</text>
+  <path d="M900 245 Q 1060 215 1180 290" class="arr-ctrl" marker-end="url(#arrCtrl)"/>
+  <text x="955" y="210" class="sig-ctrl">reg_write, result_src</text>
+
+  <!-- Load/Store Unit → MEM/WB (load_data) -->
+  <path d="M1155 330 L1180 330" class="arr-data" marker-end="url(#arr)"/>
+  <text x="1128" y="323" class="sig">load_data</text>
+
+  <!-- MEM/WB → Writeback Mux -->
+  <path d="M1222 365 L1285 365" class="arr-data" marker-end="url(#arr)"/>
+  <text x="1226" y="358" class="sig">alu_res, mem_data, pc+4</text>
+  <path d="M1222 395 L1285 395" class="arr-ctrl" marker-end="url(#arrCtrl)"/>
+  <text x="1226" y="410" class="sig-ctrl">result_src, reg_write</text>
+
+  <!-- Writeback → Register File (write-back loop along the bottom) -->
+  <path d="M1385 415 L1385 720 L 420 720 L 420 415" class="arr-wb" marker-end="url(#arrWb)"/>
+  <text x="870" y="713" class="sig-wb">write_data_wb, rd_wb, reg_write_wb  →  Register File write port</text>
+
+  <!-- ======================= FORWARDING NETWORK ======================= -->
+
+  <!-- EX/MEM → EX-stage forwarding logic (selectors + data combined, top route) -->
+  <path d="M879 230 L879 195 L 700 195 L 700 210" class="arr-fwd" marker-end="url(#arrFwd)"/>
+  <text x="710" y="190" class="sig-fwd">MEM-stage fwd:  rd_mem, reg_write_mem, alu_result_mem  →  fwd_unit + ALU mux</text>
+
+  <!-- WB loop → EX-stage forwarding logic (selectors + data combined, upper route) -->
+  <path d="M1385 330 L1385 170 L 760 170 L 760 210" class="arr-fwd" marker-end="url(#arrFwd)"/>
+  <text x="770" y="165" class="sig-fwd">WB-stage fwd:  rd_wb, reg_write_wb, write_data_wb  →  fwd_unit + ALU mux + ID bypass</text>
+
+  <!-- ID-stage bypass (from MEM/WB muxed write-data into Register File read ports) -->
+  <path d="M879 555 Q 700 610 520 405" class="arr-fwd" marker-end="url(#arrFwd)"/>
+  <text x="605" y="600" class="sig-fwd">ID-stage bypass (alu_result_mem / wdata_mem → RF read)</text>
+
+  <!-- ======================= SUMMARY BOXES ======================= -->
+  <g transform="translate(40,770)">
+    <rect x="0" y="0" width="470" height="165" rx="8" ry="8" fill="#ffffff" stroke="#cfd8dc"/>
+    <text x="14" y="22" class="mod">Hazard / forwarding summary</text>
+    <text x="14" y="46" class="sig"><tspan font-weight="700" fill="#bf360c">EX-stage forwarding:</tspan> forwarding_unit selects between</text>
+    <text x="14" y="62" class="sig">register-file read, MEM-stage ALU result, or WB-stage write</text>
+    <text x="14" y="78" class="sig">data for each ALU source, using rs1_ex/rs2_ex vs.</text>
+    <text x="14" y="94" class="sig">rd_mem/rd_wb (+ their reg_write flags).</text>
+    <text x="14" y="120" class="sig"><tspan font-weight="700" fill="#bf360c">ID-stage bypass:</tspan> same-cycle RAW hazards from EX, MEM</text>
+    <text x="14" y="136" class="sig">or WB are resolved on read_data1_id / read_data2_id</text>
+    <text x="14" y="152" class="sig">before the ID/EX register captures them.</text>
+  </g>
+
+  <g transform="translate(530,770)">
+    <rect x="0" y="0" width="470" height="165" rx="8" ry="8" fill="#ffffff" stroke="#cfd8dc"/>
+    <text x="14" y="22" class="mod">Branch / jump resolution</text>
+    <text x="14" y="46" class="sig">branch_unit + jump control in EX produce branch_taken,</text>
+    <text x="14" y="62" class="sig">which drives pc_branch_sel = (branch_taken &amp;&amp; branch) || jump.</text>
+    <text x="14" y="78" class="sig">pc_branch_target = pc_ex + immediate is fed back to the</text>
+    <text x="14" y="94" class="sig">program_counter on the next clock edge.</text>
+    <text x="14" y="120" class="sig">On a taken branch/jump, if_id_flush = id_ex_flush =</text>
+    <text x="14" y="136" class="sig">pc_branch_sel, squashing the two in-flight instructions.</text>
+    <text x="14" y="152" class="sig">No branch predictor → fixed 2-cycle mis-predict penalty.</text>
+  </g>
+
+  <g transform="translate(1020,770)">
+    <rect x="0" y="0" width="470" height="165" rx="8" ry="8" fill="#ffffff" stroke="#cfd8dc"/>
+    <text x="14" y="22" class="mod">Writeback loop</text>
+    <text x="14" y="46" class="sig">The writeback mux selects alu_result_wb / mem_read_data_wb /</text>
+    <text x="14" y="62" class="sig">pc_plus4_wb based on result_src_wb, then drives the</text>
+    <text x="14" y="78" class="sig">register_file write port (write_addr = rd_wb,</text>
+    <text x="14" y="94" class="sig">write_enable = reg_write_wb).</text>
+    <text x="14" y="120" class="sig">The same write_data_wb + rd_wb + reg_write_wb also feed the</text>
+    <text x="14" y="136" class="sig">forwarding_unit and the ID-stage bypass network.</text>
+    <text x="14" y="152" class="sig">debug_regs_flat is tapped from register_file for test benches.</text>
+  </g>
+
+</svg>
